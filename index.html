@@ -57,7 +57,6 @@
             align-items: center;
         }
         
-        /* Easter Egg Notification Style */
         #easter-egg-notification {
             position: fixed;
             top: 20%;
@@ -65,17 +64,14 @@
             transform: translateX(-50%);
             font-family: 'Press Start 2P', monospace;
             color: var(--hot-pink);
-            text-shadow: 0 0 10px var(--hot-pink);
             font-size: 1.2rem;
             z-index: 999;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease-in-out;
         }
 
         #easter-egg-notification.visible {
-            opacity: 1;
-            animation: text-flicker-red 1s infinite alternate;
+            animation: airplane-flicker 1.7s ease-in-out;
         }
 
         .logo-container {
@@ -298,7 +294,7 @@
             60% { opacity: 0.8; }
             80% { opacity: 1; }
         }
-        .logo-is-flickering { animation: logo-flicker 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .logo-is-flickering { animation: logo-flicker 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes shake {
             0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); }
@@ -326,9 +322,14 @@
             animation: rgb-glow 4s linear infinite; 
         }
 
-        @keyframes text-flicker-red {
-            from { text-shadow: 0 0 10px var(--hot-pink), 0 0 10px var(--hot-pink); }
-            to { text-shadow: 0 0 18px var(--hot-pink), 0 0 5px var(--hot-pink); }
+        /* New flicker animation for the easter egg */
+        @keyframes airplane-flicker {
+            0%, 20% { opacity: 1; text-shadow: 0 0 15px var(--hot-pink); }
+            10%, 30% { opacity: 0; text-shadow: none; }
+            40%, 50% { opacity: 1; text-shadow: 0 0 15px var(--hot-pink); }
+            45%, 55% { opacity: 0; text-shadow: none; }
+            60%, 70% { opacity: 1; text-shadow: 0 0 15px var(--hot-pink); }
+            65%, 100% { opacity: 0; text-shadow: none; }
         }
 
         @media (max-width: 850px) {
@@ -458,14 +459,15 @@
                 initialLogo.classList.add('dimmed');
             }
 
-            // --- Easter Egg Trigger ---
-            if (index === 2) { 
+            // --- Easter Egg Trigger with random chance ---
+            if (index === 2 && Math.random() < 0.09) { // ~33% chance to appear
                 const notification = document.getElementById('easter-egg-notification');
                 if (notification) {
                     notification.classList.add('visible');
+                    // The animation lasts 1.5s, after which the element is reset
                     setTimeout(() => {
                         notification.classList.remove('visible');
-                    }, 1500); // Visible for 1.5 seconds
+                    }, 1500); 
                 }
             }
             // --- End of Easter Egg ---
