@@ -10,104 +10,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Press+Start+2P&family=VT323&family=Orbitron&display=swap" rel="stylesheet">
 <style>
     :root {
-        --neon-lime: #00C852;
-        --crt-green: #33FF99;
-        --deep-black: #0D0D0D;
-        --hot-pink: #FF4081;
-        --accent-blue: #00E5FF;
-        --neutral-gray: #B0BEC5;
+        --neon-lime: #00C852; --crt-green: #33FF99; --deep-black: #0D0D0D;
+        --hot-pink: #FF4081; --accent-blue: #00E5FF; --neutral-gray: #B0BEC5;
     }
     html, body {
-        height: 100%; margin: 0;
-        background-color: var(--deep-black);
-        color: var(--neon-lime);
-        font-family: 'Share Tech Mono', monospace;
-        overflow: hidden;
+        height: 100%; margin: 0; background-color: var(--deep-black);
+        color: var(--neon-lime); font-family: 'Share Tech Mono', monospace; overflow: hidden;
     }
     body {
         background-color: var(--tg-theme-bg-color, var(--deep-black));
         padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
-    #background-canvas {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 1;
-    }
+    #background-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     .screen {
-        position: absolute; top: 0; left: 0;
-        width: 100%; height: 100%;
-        display: flex; opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        z-index: 2;
-        box-sizing: border-box;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; opacity: 0; transition: opacity 0.5s ease-in-out;
+        z-index: 2; box-sizing: border-box;
     }
     #init-screen {
-        opacity: 1; z-index: 3;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        opacity: 1; z-index: 3; flex-direction: column;
+        justify-content: center; align-items: center;
     }
-    .logo-container img {
-        height: 80px; 
-        width: auto;
-        filter: drop-shadow(0 0 15px var(--neon-lime));
-    }
-    #log {
-        font-size: 1rem;
-        color: var(--crt-green);
-        width: 90%;
-        max-width: 700px;
-        max-height: 20vh;
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-    #surface-interface {
-        display: none; background-color: transparent;
-        padding: 0.5rem; 
-        box-sizing: border-box;
-    }
+    .logo-container img { height: 80px; width: auto; filter: drop-shadow(0 0 15px var(--neon-lime)); }
+    #log { font-size: 1rem; color: var(--crt-green); width: 90%; max-width: 700px; max-height: 20vh; overflow: hidden; margin-bottom: 2rem; }
+    #surface-interface { display: none; background-color: transparent; padding: 0.5rem; box-sizing: border-box; }
     .surface-container {
-        width: 100%; height: 100%;
-        border: 2px solid var(--neon-lime); 
+        width: 100%; height: 100%; border: 2px solid var(--neon-lime);
         box-shadow: 0 0 15px var(--neon-lime) inset, 0 0 10px rgba(0, 200, 82, 0.5);
-        display: grid; 
-        grid-template-rows: auto 1fr auto;
-        padding: 1rem; 
-        box-sizing: border-box;
+        display: grid; grid-template-rows: auto 1fr auto; padding: 1rem; box-sizing: border-box;
     }
-    .surface-header {
-        display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 2px solid var(--neon-lime); padding-bottom: 0.5rem; gap: 1rem;
-    }
-    .logo-area .logo {
-        font-family: 'Press Start 2P', monospace; font-size: 1.2rem;
-        color: var(--hot-pink); text-shadow: 0 0 5px var(--hot-pink); margin: 0;
-    }
+    .surface-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-lime); padding-bottom: 0.5rem; gap: 1rem; }
+    .logo-area .logo { font-family: 'Press Start 2P', monospace; font-size: 1.2rem; color: var(--hot-pink); text-shadow: 0 0 5px var(--hot-pink); margin: 0; }
     .logo-area .version-number { font-size: 0.7rem; color: var(--neutral-gray); margin-top: 4px; }
     #ip-display { text-align: center; font-size: 1rem; color: var(--accent-blue); }
-    .surface-main {
-        position: relative; display: flex; flex-direction: column;
-        justify-content: center; align-items: center; overflow: hidden;
-    }
-    .background-title {
-        position: absolute; font-family: 'Orbitron', sans-serif;
-        font-size: clamp(3rem, 15vw, 8rem); color: rgba(255, 255, 255, 0.05);
-        margin: 0; z-index: 1;
-    }
-    .main-image-placeholder {
-        width: 150px; height: 150px; 
-        display: flex; justify-content: center; align-items: center;
-        text-align: center; z-index: 2;
-    }
+    .surface-main { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+    .background-title { position: absolute; font-family: 'Orbitron', sans-serif; font-size: clamp(3rem, 15vw, 8rem); color: rgba(255, 255, 255, 0.05); margin: 0; z-index: 1; }
+    .main-image-placeholder { width: 150px; height: 150px; display: flex; justify-content: center; align-items: center; text-align: center; z-index: 2; }
     .main-image-placeholder img { width: 100%; height: auto; max-width: 140px; }
-    .surface-footer {
-        display: flex; justify-content: space-between; align-items: flex-end;
-        padding-top: 1rem; border-top: 2px solid var(--neon-lime);
-        flex-wrap: wrap; gap: 1rem;
-    }
-    .news-ticker-container h2 {
-        font-family: 'Press Start 2P', monospace; font-size: 1rem;
-        color: var(--accent-blue); margin: 0 0 0.5rem 0;
-    }
+    .surface-footer { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 1rem; border-top: 2px solid var(--neon-lime); flex-wrap: wrap; gap: 1rem; }
+    .news-ticker-container h2 { font-family: 'Press Start 2P', monospace; font-size: 1rem; color: var(--accent-blue); margin: 0 0 0.5rem 0; }
     .footer-right-column { display: flex; align-items: center; gap: 1rem; }
     .serial-number { font-size: 1.2rem; color: var(--hot-pink); }
 </style>
@@ -120,7 +61,6 @@
             <img src="img/main.svg" alt="logo" id="initial-logo">
         </div>
     </div>
-    
     <div id="surface-interface" class="screen">
         <div class="surface-container">
             <header class="surface-header">
@@ -165,7 +105,7 @@
 
     // --- 2. ГЛАВНЫЕ ФУНКЦИИ (ЛОГИКА) ---
     function onTelegramAuth(user) {
-        console.log("Telegram auth data received:", user);
+        // ... (код этой функции остается таким же)
         fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -173,47 +113,55 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log("Data from backend API:", data);
             if (data.status === 'ok') {
                 document.querySelector('.main-image-placeholder').style.display = 'none';
                 document.querySelector('.background-title').style.display = 'none';
                 document.getElementById('telegram-login-container').style.display = 'none';
-                
                 if (data.is_subscribed) {
                     displayDashboard(data);
                 } else {
-                    alert("Подписка неактивна. Пожалуйста, приобретите тариф в боте.");
+                    alert("Подписка неактивна.");
                 }
-            } else {
-                throw new Error(data.message || 'Ошибка ответа API');
-            }
+            } else { throw new Error(data.message || 'API Error'); }
         })
         .catch(error => {
-            console.error('Error during fetch:', error);
-            alert('Не удалось получить данные от сервера. Проверьте консоль (F12).');
+            console.error('Fetch Error:', error);
+            alert('Не удалось получить данные от сервера.');
         });
     }
 
     function displayDashboard(data) {
+        // ... (код этой функции остается таким же)
         const dashboard = document.getElementById('user-dashboard');
         document.getElementById('welcome-message').textContent = `Привет, ${data.first_name}!`;
         const endDate = new Date(data.subscription_end);
         document.getElementById('sub-status').textContent = `Активен до ${endDate.toLocaleDateString()}`;
         document.getElementById('tariff-name').textContent = `"${data.tariff_details.name}"`;
-        document.getElementById('tariff-details-list').innerHTML = `
-            <li><strong>Скорость:</strong> ${data.tariff_details.speed}</li>
-            <li><strong>Подключения:</strong> ${data.tariff_details.connections}</li>
-        `;
+        document.getElementById('tariff-details-list').innerHTML = `<li><strong>Скорость:</strong> ${data.tariff_details.speed}</li><li><strong>Подключения:</strong> ${data.tariff_details.connections}</li>`;
         const firstKey = data.keys[0];
         document.getElementById('connection-key').textContent = firstKey;
         const qrContainer = document.getElementById('qrcode-container');
-qrContainer.innerHTML = "";
+        qrContainer.innerHTML = "";
         new QRCode(qrContainer, { text: firstKey, width: 180, height: 180 });
         dashboard.style.display = 'block';
     }
 
-    // --- 3. АНИМАЦИИ И ЗАПУСК ---
-    function initializeWebsite() {
+    // --- 3. ИНИЦИАЛИЗАЦИЯ И УПРАВЛЕНИЕ ЗАПУСКОМ ---
+    function initializeTelegramWidget() {
+        const loginContainer = document.getElementById('telegram-login-container');
+        if (loginContainer) {
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-widget.js?22';
+            script.setAttribute('data-telegram-login', BOT_USERNAME);
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            script.setAttribute('data-request-access', 'write');
+            loginContainer.appendChild(script);
+        }
+    }
+
+    function initializeAnimations() {
+        // Здесь весь ваш код для анимаций
         const canvas = document.getElementById('background-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -223,7 +171,6 @@ qrContainer.innerHTML = "";
         const fontSize = 16;
         const columns = canvas.width / fontSize;
         const rainDrops = Array.from({ length: columns }).fill(1);
-        
         function animateBackground() {
             if (!isBgAnimationRunning) return;
             ctx.fillStyle = 'rgba(13, 13, 13, 0.05)';
@@ -233,14 +180,11 @@ qrContainer.innerHTML = "";
             for (let i = 0; i < rainDrops.length; i++) {
                 const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
                 ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    rainDrops[i] = 0;
-                }
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) { rainDrops[i] = 0; }
                 rainDrops[i]++;
             }
             requestAnimationFrame(animateBackground);
         };
-
         const logElement = document.getElementById('log');
         function typeWriter(element, text, callback, i = 0) {
             if (i < text.length) {
@@ -251,11 +195,9 @@ qrContainer.innerHTML = "";
                 if (callback) setTimeout(callback, 500);
             }
         }
-
-        const terminalLines = ["> ZelenyPath v.Ω connection protocol initiated...", "> Verifying signature... [OK]", "> Routing to public interface..."];
+        const terminalLines = ["> Connection protocol initiated...", "> Verifying signature... [OK]", "> Routing to public interface..."];
         const initScreen = document.getElementById('init-screen');
         const surfaceInterface = document.getElementById('surface-interface');
-        
         function runTerminalLines(index) {
             if (index < terminalLines.length) {
                 const p = document.createElement('p');
@@ -271,33 +213,18 @@ qrContainer.innerHTML = "";
                         initScreen.style.display = 'none';
                         isBgAnimationRunning = false;
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        // В ЭТОТ МОМЕНТ ГЛАВНЫЙ ЭКРАН ПОЛНОСТЬЮ ВИДИМ
-                        // ИМЕННО СЕЙЧАС НУЖНО ИНИЦИАЛИЗИРОВАТЬ ВИДЖЕТ
+                        // ФИНАЛЬНЫЙ ЭТАП: Инициализируем виджет, когда все готово
                         initializeTelegramWidget();
                     }, 500);
                 }, 1000);
             }
         }
-        
         animateBackground();
         setTimeout(() => runTerminalLines(0), 500);
     }
 
-    function initializeTelegramWidget() {
-        const loginContainer = document.getElementById('telegram-login-container');
-        if (loginContainer) {
-            const script = document.createElement('script');
-            script.src = 'https://telegram.org/js/telegram-widget.js?22';
-            script.setAttribute('data-telegram-login', BOT_USERNAME);
-            script.setAttribute('data-size', 'large');
-            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            script.setAttribute('data-request-access', 'write');
-            loginContainer.appendChild(script);
-        }
-    }
-
-    // ЗАПУСКАЕМ ВСЕ ПОСЛЕ ПОЛНОЙ ЗАГРУЗКИ СТРАНИЦЫ
-    window.addEventListener('load', initializeWebsite);
+    // ГЛАВНАЯ ТОЧКА ВХОДА: Запускаем все после полной загрузки страницы
+    window.addEventListener('load', initializeAnimations);
 </script>
 </body>
 </html>
