@@ -105,7 +105,6 @@
 
     // --- 2. ГЛАВНЫЕ ФУНКЦИИ (ЛОГИКА) ---
     function onTelegramAuth(user) {
-        // ... (код этой функции остается таким же)
         fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -131,7 +130,6 @@
     }
 
     function displayDashboard(data) {
-        // ... (код этой функции остается таким же)
         const dashboard = document.getElementById('user-dashboard');
         document.getElementById('welcome-message').textContent = `Привет, ${data.first_name}!`;
         const endDate = new Date(data.subscription_end);
@@ -161,7 +159,6 @@
     }
 
     function initializeAnimations() {
-        // Здесь весь ваш код для анимаций
         const canvas = document.getElementById('background-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
