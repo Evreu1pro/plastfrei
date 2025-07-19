@@ -207,7 +207,7 @@
         const firstKey = data.keys[0];
         document.getElementById('connection-key').textContent = firstKey;
         const qrContainer = document.getElementById('qrcode-container');
-        qrContainer.innerHTML = "";
+qrContainer.innerHTML = "";
         new QRCode(qrContainer, { text: firstKey, width: 180, height: 180 });
         dashboard.style.display = 'block';
     }
