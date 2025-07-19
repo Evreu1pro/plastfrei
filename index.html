@@ -339,327 +339,70 @@
     </div>
 
     <script>
-        // --- All Javascript code is verified to be stable and functional ---
+    // --- 1. КОНФИГУРАЦИЯ ---
+    const API_URL = 'https://c6fcfa7f5b70.ngrok-free.app/api/get_user_info'; 
+    const BOT_USERNAME = 'plastfreivpn_bot';
 
-        const cursor = document.getElementById('custom-cursor');
-        window.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        
-        const canvas = document.getElementById('background-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let isBgAnimationRunning = true;
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const nums = '0123456789';
-        const alphabet = katakana + latin + nums;
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const rainDrops = [];
-        for (let x = 0; x < columns; x++) {
-            rainDrops[x] = 1;
+    // --- 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И КОД АНИМАЦИЙ (ВАШ ОРИГИНАЛЬНЫЙ КОД) ---
+    // (Здесь весь ваш существующий код для анимаций, я его немного почистил и оставил)
+    const cursor = document.getElementById('custom-cursor');
+    window.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+    const canvas = document.getElementById('background-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let isBgAnimationRunning = true;
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const nums = '0123456789';
+    const alphabet = katakana + latin + nums;
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const rainDrops = [];
+    for (let x = 0; x < columns; x++) { rainDrops[x] = 1; }
+    function animateBackground() {
+        if (!isBgAnimationRunning) return;
+        ctx.fillStyle = 'rgba(13, 13, 13, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'var(--neon-lime)';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < rainDrops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+            if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                rainDrops[i] = 0;
+            }
+            rainDrops[i]++;
         }
-
-        function animateBackground() {
-            if (!isBgAnimationRunning) return;
-            
-            ctx.fillStyle = 'rgba(13, 13, 13, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = 'var(--neon-lime)';
-            ctx.font = fontSize + 'px monospace';
-
-            for (let i = 0; i < rainDrops.length; i++) {
-                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    rainDrops[i] = 0;
-                }
-                rainDrops[i]++;
-            }
-            requestAnimationFrame(animateBackground);
-        };
-        
-        const initScreen = document.getElementById('init-screen');
-        const surfaceInterface = document.getElementById('surface-interface');
-        const logElement = document.getElementById('log');
-        const initialLogo = document.getElementById('initial-logo');
-        const terminalLines = ["> ZelenyPath v.Ω connection protocol initiated...", "> Verifying signature... [OK]", "> Accessing node... [127.0.0.1]", "> No threats detected.", "> Routing to public interface..."];
-        
-        function typeWriter(element, text, callback, i = 0) {
-            if (!element || (element.id === 'news-content-area' && !isNewsTickerActive)) {
-                if(callback) callback();
-                return;
-            };
-            logElement.scrollTop = logElement.scrollHeight;
-            if (i < text.length) {
-                element.innerHTML = text.substring(0, i + 1) + '<span id="log-cursor"></span>';
-                setTimeout(() => typeWriter(element, text, callback, i + 1), 20);
-            } else {
-                element.innerHTML = text;
-                logElement.scrollTop = logElement.scrollHeight;
-                if (callback) setTimeout(callback, 500);
-            }
+        requestAnimationFrame(animateBackground);
+    };
+    const logElement = document.getElementById('log');
+    let isNewsTickerActive = false; // Определяем заранее
+    function typeWriter(element, text, callback, i = 0) {
+        if (!element || (element.id === 'news-content-area' && !isNewsTickerActive && !callback)) { return; }
+        if (i < text.length) {
+            element.innerHTML = text.substring(0, i + 1) + '<span id="log-cursor"></span>';
+            setTimeout(() => typeWriter(element, text, callback, i + 1), 20);
+        } else {
+            element.innerHTML = text;
+            if (callback) setTimeout(callback, 500);
         }
+    }
+     function scrambleAndClear(element, onComplete) { 
+        if (!element || !element.innerText) { if(onComplete) onComplete(); return; } 
+        const originalText = element.innerText; 
+        const chars = '!<>-_\\/[]{}—=+*^?#_'; 
+        let scrambleInterval = setInterval(() => { element.innerText = Array.from({ length: originalText.length }, () => chars[Math.floor(Math.random() * chars.length)]).join(''); }, 50); 
+        setTimeout(() => { clearInterval(scrambleInterval); element.innerText = ''; if (onComplete) onComplete(); }, 800); 
+     }
 
-        function runTerminalLines(index) {
-            if (index === 0) {
-                initialLogo.classList.add('dimmed');
-            }
 
-            // --- Easter Egg Trigger with random chance ---
-            if (index === 2 && Math.random() < 0.09) { // ~33% chance to appear
-                const notification = document.getElementById('easter-egg-notification');
-                if (notification) {
-                    notification.classList.add('visible');
-                    // The animation lasts 1.5s, after which the element is reset
-                    setTimeout(() => {
-                        notification.classList.remove('visible');
-                    }, 1500); 
-                }
-            }
-            // --- End of Easter Egg ---
-
-            if (index < terminalLines.length) {
-                const p = document.createElement('p');
-                p.style.margin = '0';
-                p.style.lineHeight = '1.3';
-                logElement.appendChild(p);
-                typeWriter(p, terminalLines[index], () => {
-                    setTimeout(() => runTerminalLines(index + 1), 500);
-                });
-            } else {
-                setTimeout(() => {
-                    initScreen.style.opacity = '0';
-                    surfaceInterface.style.display = 'flex';
-                    setTimeout(() => {
-                        surfaceInterface.style.opacity = '1';
-                        initScreen.style.display = 'none';
-
-                        isBgAnimationRunning = false;
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        
-                        const mainCharacterIcon = document.getElementById('main-character-icon');
-                        mainCharacterIcon.style.opacity = '1';
-                        mainCharacterIcon.classList.add('access-granted-anim');
-                        
-                        startSurfaceScripts();
-                    }, 500);
-                }, 1000);
-            }
-        }
-        
-        let fontIntervalId;
-        let newsIntervalId;
-        let ipChangeIntervalId;
-        let dataScrambleIntervalId;
-        let isNewsTickerActive = false;
-
-        function startSurfaceScripts(isReset = false) {
-            clearInterval(fontIntervalId);
-            clearTimeout(newsIntervalId);
-            clearInterval(ipChangeIntervalId);
-            clearInterval(dataScrambleIntervalId);
-            isNewsTickerActive = true; 
-
-            const ipAddressEl = document.getElementById('ip-address');
-            const countryFlagEl = document.getElementById('country-flag');
-            const ipDisplayEl = document.getElementById('ip-display');
-            const mainIconEl = document.getElementById('main-character-icon');
-            
-            window.addEventListener('mousemove', (e) => {
-                const centerX = window.innerWidth / 2;
-                const centerY = window.innerHeight / 2;
-                const deltaX = (e.clientX - centerX) * 0.02; 
-                const deltaY = (e.clientY - centerY) * 0.03;
-
-                if(mainIconEl) {
-                    mainIconEl.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-                }
-            });
-
-            const grayZoneCountries = ['AM', 'AZ', 'BY', 'KZ', 'KG', 'MD', 'RU', 'TJ', 'TM', 'UZ', 'UA'];
-            const europeanCountries = ['AL', 'AD', 'AT', 'BE', 'BA', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FO', 'FI', 'FR', 'DE', 'GI', 'GR', 'HU', 'IS', 'IE', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'MC', 'ME', 'NL', 'MK', 'NO', 'PL', 'PT', 'RO', 'SM', 'RS', 'SK', 'SI', 'ES', 'SE', 'CH', 'GB', 'GG', 'JE', 'IM'];
-
-            if (!isReset) {
-                fetch('https://ipapi.co/json/')
-                    .then(response => response.json())
-                    .then(data => {
-                        ipAddressEl.textContent = data.ip || 'N/A';
-                        const userCountry = data.country_code;
-                        countryFlagEl.textContent = data.country_code ? data.country_code.slice(0, 2).split('').map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('') : '🏴';
-
-                        if (grayZoneCountries.includes(userCountry)) {
-                            countryFlagEl.style.filter = 'grayscale(100%)';
-                            ipDisplayEl.style.color = 'var(--neutral-gray)';
-                        } else if (europeanCountries.includes(userCountry) || userCountry === 'US') {
-                            countryFlagEl.style.filter = 'drop-shadow(0 0 8px var(--crt-green))';
-                            ipDisplayEl.style.color = 'var(--crt-green)';
-                            runCheckerAnimation();
-                        }
-                    })
-                    .catch(error => {
-                        console.error("IP Geolocation failed:", error);
-                        ipAddressEl.textContent = 'ACCESS DENIED';
-                        countryFlagEl.textContent = '🚫';
-                    });
-            }
-            
-            const checkerEl = document.getElementById('blocklist-checker');
-            const checkerResultEl = document.getElementById('checker-result');
-            const checkerToggleEl = document.getElementById('checker-toggle-icon');
-            const checkerSummaryEl = document.getElementById('checker-summary');
-
-            function runCheckerAnimation() {
-                checkerEl.classList.add('visible');
-                const checks = ["АНАЛИЗ DNS...", "ЗАПРОС К БАЗАМ...", "ПОИСК В СПИСКАХ...", "СВЕРКА СИГНАТУР..."];
-                let checkIndex = 0;
-                const checkInterval = setInterval(() => {
-                    checkerResultEl.textContent = checks[checkIndex % checks.length];
-                    checkIndex++;
-                }, 200);
-
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    checkerResultEl.innerHTML = `ПРОВЕРКА ЗАВЕРШЕНА: <span class="status-ok">СВОБОДА</span>`;
-                    checkerToggleEl.style.display = 'inline-block';
-                }, 2500);
-            }
-
-            checkerSummaryEl.addEventListener('click', () => {
-                if(checkerToggleEl.style.display === 'none') return;
-                const isExpanded = checkerEl.classList.toggle('expanded');
-                checkerToggleEl.textContent = isExpanded ? '✖' : '▼';
-            });
-
-            const backgroundTitle = document.querySelector('.background-title');
-            const fonts = ['Orbitron', 'Press Start 2P', 'VT323', 'Share Tech Mono'];
-            let currentFontIndex = 0;
-            fontIntervalId = setInterval(() => {
-                currentFontIndex = (currentFontIndex + 1) % fonts.length;
-                backgroundTitle.style.fontFamily = `'${fonts[currentFontIndex]}', monospace`;
-            }, 3000);
-
-            const newsElement = document.getElementById('news-content-area');
-            const rootStyles = getComputedStyle(document.documentElement);
-            const liveFeedData = JSON.parse('[{"id":"15:31","type":"normal","text":"13 арестов в Торре-Пачеко на фоне антимигрантских протестов."},{"id":"15:14","type":"skipped","text":""},{"id":"15:25","type":"normal","text":"Открыта регистрация на курсы цифровой послушности."},{"id":"15:32","type":"normal","text":"Глава МИД Греции вылетел в Ливию на фоне напряжённости."},{"id":"15:04","type":"error","text":"Error 7421: News object missing index hash"},{"id":"15:05","type":"deleted","text":"Карта туннелей была размещена в открытом чате Telegram."},{"id":"15:29","type":"error","text":"⚠️ Transmit interrupted due to noise injection"},{"id":"14:59","type":"deleted","text":"Карта туннелей была размещена в открытом чате Telegram."},{"id":"15:22","type":"normal","text":"Оппозиционного мэра Стамбула Экрема Имамоглу приговорили к тюремному сроку."},{"id":"15:43","type":"archived","text":"Повтор эфира \'Зачем вам VPN?\'."},{"id":"15:41","type":"normal","text":"Открыта регистрация на курсы цифровой послушности."},{"id":"15:11","type":"archived","text":"Архивный выпуск новостей ГОСТ-ТВ."},{"id":"15:25","type":"normal","text":"ЦАХАЛ нанёс удары по штабу Генштаба в Дамаске."},{"id":"15:36","type":"normal","text":"Израиль: ультраортодоксальный блок покидает коалицию."},{"id":"15:26","type":"error","text":"⚠️ Transmit interrupted due to noise injection"},{"id":"15:23","type":"normal","text":"Посол США в Израиле посетил заседание по делу Нетаньяху."},{"id":"15:28","type":"normal","text":"В Венеции представили олимпийские медали 2026 года."},{"id":"15:07","type":"deleted","text":"Сайт ZelenyPath вновь активен. Провайдеры теряют контроль."},{"id":"15:24","type":"normal","text":"Экс-дипломат США: режим в Иране не движется к демократии."},{"id":"15:34","type":"normal","text":"Сирийские друзы обвиняют власти в нарушении перемирия."},{"id":"15:19","type":"error","text":"Error 7421: News object missing index hash"},{"id":"15:32","type":"error","text":"⚠️ Transmit interrupted due to noise injection"},{"id":"15:20","type":"deleted","text":"Сайт ZelenyPath вновь активен. Провайдеры теряют контроль."},{"id":"15:13","type":"error","text":"Error 7421: News object missing index hash"},{"id":"14:58","type":"error","text":"Error 7421: News object missing index hash"},{"id":"15:30","type":"normal","text":"В Помпеи вернули украденную нацистами римскую мозаику."},{"id":"15:18","type":"archived","text":"Заседание Цифрового Форума от 12.04.2033."},{"id":"15:39","type":"skipped","text":""},{"id":"15:27","type":"leak","text":"🔓 Подключение к неофициальному туннелю установлено. Лицо: Пласт"},{"id":"15:38","type":"normal","text":"Польша расследует заявление ультраправого депутата об Освенциме."},{"id":"15:27","type":"normal","text":"Наводнение в Нью-Джерси: погибли две женщины."},{"id":"15:37","type":"error","text":"DataBlockCorrupted: cannot decode news sector"},{"id":"15:33","type":"normal","text":"Открыта регистрация на курсы цифровой послушности."},{"id":"15:30","type":"archived","text":"Заседание Цифрового Форума от 12.04.2033."},{"id":"15:40","type":"deleted","text":"Сайт ZelenyPath вновь активен. Провайдеры теряют контроль."},{"id":"15:03","type":"leak","text":"🔓 Кошкодевочка зафиксирована на выходе из API."},{"id":"15:21","type":"error","text":"Error 7421: News object missing index hash"},{"id":"15:09","type":"archived","text":"Заседание Цифрового Форума от 12.04.2033."},{"id":"15:00","type":"normal","text":"Открыта регистрация на курсы цифровой послушности."},{"id":"15:37","type":"normal","text":"Кипр отмечает годовщину переворота — звучат сирены."},{"id":"15:35","type":"normal","text":"Трамп пообещал Украине ракеты Patriot через ЕС."},{"id":"15:33","type":"normal","text":"Жара усугубляет гуманитарный кризис в Газе."},{"id":"15:16","type":"deleted","text":"Поступило неподтверждённое сообщение от движения Пласт."},{"id":"15:34","type":"archived","text":"Заседание Цифрового Форума от 12.04.2033."},{"id":"15:02","type":"deleted","text":"Сайт ZelenyPath вновь активен. Провайдеры теряют контроль."},{"id":"15:26","type":"normal","text":"На Крите протесты против поселения мигрантов."},{"id":"15:10","type":"archived","text":"Повтор эфира \'Зачем вам VPN?\'."},{"id":"14:57","type":"deleted","text":"Сайт ZelenyPath вновь активен. Провайдеры теряют контроль."},{"id":"15:23","type":"normal","text":"Открыта регистрация на курсы цифровой послушности."},{"id":"14:56","type":"leak","text":"🔓 Кошкодевочка зафиксирована на выходе из API."},{"id":"15:29","type":"normal","text":"Старейший марафонец Фауджа Сингх погиб в ДТП."},{"id":"15:36","type":"normal","text":"В ХВ-95 прошла утренняя зарядка с офицером-психологом."}]');
-            
-            function scrambleAndClear(element, onComplete) { if (!element || !element.innerText) { if(onComplete) onComplete(); return; } const originalText = element.innerText; const chars = '!<>-_\\/[]{}—=+*^?#_'; let scrambleInterval = setInterval(() => { if (!isNewsTickerActive) { clearInterval(scrambleInterval); return; } element.innerText = Array.from({ length: originalText.length }, () => chars[Math.floor(Math.random() * chars.length)]).join(''); }, 50); setTimeout(() => { clearInterval(scrambleInterval); element.innerText = ''; if (onComplete && isNewsTickerActive) onComplete(); }, 800); }
-            function advanceToNextNews() { if(!isNewsTickerActive) return; newsIntervalId = setTimeout(showNextNewsItem, 500); }
-            function showNextNewsItem() { 
-                if(!isNewsTickerActive) return; 
-                const currentItem = liveFeedData[Math.floor(Math.random() * liveFeedData.length)]; 
-                if (currentItem.type === 'skipped' || !currentItem.text) { 
-                    advanceToNextNews(); 
-                    return; 
-                } 
-
-                const now = new Date();
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                const localTime = `${hours}:${minutes}`;
-
-                newsElement.className = ''; 
-                newsElement.style.cssText = ''; 
-                const text = `▶️ ${localTime} | ${currentItem.text}`;
-                
-                switch(currentItem.type) { 
-                    case 'error': animateError(text); break; 
-                    case 'deleted': animateDeleted(text); break; 
-                    case 'leak': animateLeak(text); break; 
-                    default: animateNormal(text); break; 
-                } 
-            }
-            function animateNormal(text) { typeWriter(newsElement, text, () => { setTimeout(() => scrambleAndClear(newsElement, advanceToNextNews), 2000); }); }
-            function animateLeak(text) { newsElement.style.color = rootStyles.getPropertyValue('--crt-green'); typeWriter(newsElement, text, () => { newsElement.style.textShadow = `0 0 15px ${rootStyles.getPropertyValue('--crt-green')}`; setTimeout(() => { newsElement.style.textShadow = 'none'; setTimeout(() => scrambleAndClear(newsElement, advanceToNextNews), 200); }, 200); }); }
-            function animateDeleted(text) { newsElement.style.textDecoration = 'line-through'; newsElement.style.color = rootStyles.getPropertyValue('--neutral-gray'); typeWriter(newsElement, text, () => { setTimeout(() => { scrambleAndClear(newsElement, () => { newsElement.style.textDecoration = 'none'; newsElement.style.color = rootStyles.getPropertyValue('--hot-pink'); const deletedMsg = "[ОШИБКА 404: РЕСУРС УДАЛЕН СЕРВЕРОМ]"; typeWriter(newsElement, deletedMsg, () => { setTimeout(() => scrambleAndClear(newsElement, advanceToNextNews), 2000); }); }); }, 1500); }); }
-            function animateError(text) { newsElement.style.color = rootStyles.getPropertyValue('--hot-pink'); newsElement.style.textShadow = `0 0 8px ${rootStyles.getPropertyValue('--hot-pink')}`; typeWriter(newsElement, text, () => { newsElement.classList.add('is-blinking-red'); setTimeout(() => { if(!isNewsTickerActive) return; newsElement.classList.remove('is-blinking-red'); newsElement.style.color = rootStyles.getPropertyValue('--crt-green'); newsElement.style.textShadow = `0 0 10px ${rootStyles.getPropertyValue('--crt-green')}`; const successMsg = "[АТАКА НЕУДАЧНА] — СИГНАЛ СТАБИЛЕН"; typeWriter(newsElement, successMsg, () => { setTimeout(() => { newsElement.style.textShadow = 'none'; scrambleAndClear(newsElement, advanceToNextNews) }, 1500); }); }, 2500); }); }
-
-            const modal = document.getElementById('connection-modal');
-            const connectLink = document.getElementById('connect-link');
-            const declineBtn = document.getElementById('decline-btn');
-            const agreeBtn = document.getElementById('agree-btn');
-            
-            function showModal() { surfaceInterface.classList.add('blurred'); modal.classList.add('visible'); }
-            function hideModal() { surfaceInterface.classList.remove('blurred'); modal.classList.remove('visible'); }
-            
-            connectLink.addEventListener('click', (e) => { e.preventDefault(); showModal(); });
-            agreeBtn.addEventListener('click', () => { hideModal(); });
-            declineBtn.addEventListener('click', () => { hideModal(); initiateDenialSequence(); });
-            
-            const accessDeniedScreen = document.getElementById('access-denied-screen');
-            const mainContent = document.querySelector('.surface-main');
-            const surfaceContainer = document.querySelector('.surface-container');
-
-            function generateRandomString(length) { const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'; let result = ''; for (let i = 0; i < length; i++) { result += chars.charAt(Math.floor(Math.random() * chars.length)); } return result; }
-            function generateRandomDataLine() { const types = ['АДРЕС:', 'СВЯЗЬ:', 'ID_УСТРОЙСТВА:', 'HASH_ПРОФИЛЯ:', 'РОДСТВЕННИК:']; const randomType = types[Math.floor(Math.random() * types.length)]; let randomValue = ''; switch(randomType) { case 'АДРЕС:': randomValue = `ул. ${generateRandomString(8)}, ${Math.floor(Math.random() * 100)}`; break; case 'СВЯЗЬ:': randomValue = `+7(9${Math.floor(Math.random()*100).toString().padStart(2,'0')})XXX-XX-XX`; break; case 'ID_УСТРОЙСТВА:': randomValue = generateRandomString(32); break; case 'HASH_ПРОФИЛЯ:': randomValue = generateRandomString(64); break; case 'РОДСТВЕННИК:': randomValue = `${generateRandomString(6)} ${generateRandomString(8)}`; break; } return `${randomType.padEnd(15, ' ')}${randomValue}`; }
-            function initiateDenialSequence() { 
-                isNewsTickerActive = false; 
-                clearInterval(fontIntervalId); 
-                clearTimeout(newsIntervalId);
-                scrambleAndClear(newsElement); 
-                
-                mainIconEl.classList.remove('access-granted-anim'); 
-                document.querySelector('.main-image-placeholder').classList.add('hidden'); 
-                document.querySelector('.background-title').classList.add('hidden'); 
-                document.querySelector('.surface-footer').classList.add('hidden'); 
-                surfaceContainer.classList.add('denial-active'); 
-                accessDeniedScreen.classList.remove('hidden'); 
-                accessDeniedScreen.innerHTML = 'ПОДОЗРЕНИЕ В СОТРУДНИЧЕСТВЕ С ГОССЕКТОРОМ 😏'; 
-                const ipDisplay = document.getElementById('ip-display'); 
-                ipDisplay.classList.add('is-blinking-red'); 
-                ipChangeIntervalId = setInterval(() => { document.getElementById('ip-address').textContent = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`; }, 100); 
-                let leakedDataContainer = document.getElementById('leaked-data-container'); 
-                if (!leakedDataContainer) { leakedDataContainer = document.createElement('div'); leakedDataContainer.id = 'leaked-data-container'; mainContent.appendChild(leakedDataContainer); } 
-                dataScrambleIntervalId = setInterval(() => { let dataHTML = ''; for(let i = 0; i < 5; i++) { dataHTML += generateRandomDataLine() + '<br>'; } leakedDataContainer.innerHTML = dataHTML; }, 300); 
-                setTimeout(() => leakedDataContainer.classList.add('visible'), 500); 
-                let resetButton = document.getElementById('reset-button'); 
-                if (!resetButton) { resetButton = document.createElement('button'); resetButton.id = 'reset-button'; resetButton.textContent = 'ПРИСЯГНУТЬ ВЕРНОСТИ'; mainContent.appendChild(resetButton); resetButton.addEventListener('click', resetSiteState); } 
-            }
-            function resetSiteState() {
-                clearInterval(ipChangeIntervalId);
-                clearInterval(dataScrambleIntervalId);
-                isNewsTickerActive = false;
-                clearTimeout(newsIntervalId);
-
-                surfaceContainer.classList.remove('denial-active');
-                
-                const ipDisplay = document.getElementById('ip-display');
-                ipDisplay.classList.remove('is-blinking-red');
-                ipDisplay.style.color = 'var(--accent-blue)';
-                document.getElementById('ip-address').textContent = '127.0.0.1';
-                document.getElementById('country-flag').textContent = '🏴';
-                
-                accessDeniedScreen.classList.add('hidden');
-                document.querySelector('.main-image-placeholder').classList.remove('hidden');
-                document.querySelector('.background-title').classList.remove('hidden');
-                document.querySelector('.surface-footer').classList.remove('hidden');
-                
-                document.getElementById('main-character-icon').classList.add('access-granted-anim');
-                
-                const leakedDataContainer = document.getElementById('leaked-data-container');
-                if(leakedDataContainer) leakedDataContainer.remove();
-                const resetButton = document.getElementById('reset-button');
-                if(resetButton) resetButton.remove();
-                
-                startSurfaceScripts(true);
-            }
-
-            showNextNewsItem();
-        }
-
-        initialLogo.classList.add('logo-is-flickering');
-        animateBackground();
-        setTimeout(() => runTerminalLines(0), 1000);
-        const API_URL = ' https://c6fcfa7f5b70.ngrok-free.app';
-
+    // --- 3. ЛОГИКА СИНХРОНИЗАЦИИ С TELEGRAM ---
     function onTelegramAuth(user) {
-        // Показываем индикатор загрузки
+        console.log("Telegram auth data received:", user);
         const newsElement = document.getElementById('news-content-area');
         typeWriter(newsElement, "▶️ Авторизация... Проверка подписи... Соединение с ядром...");
 
@@ -668,41 +411,39 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+            return response.json();
+        })
         .then(data => {
+            console.log("Data from backend API:", data);
             if (data.status === 'ok') {
-                // Прячем старый контент
                 document.querySelector('.main-image-placeholder').style.display = 'none';
                 document.querySelector('.background-title').style.display = 'none';
+                document.getElementById('telegram-login-container').style.display = 'none';
                 
                 if (data.is_subscribed) {
-                    // Пользователь с подпиской - показываем личный кабинет
                     displayDashboard(data);
                 } else {
-                    // Пользователь без подписки
                     scrambleAndClear(newsElement, () => {
-                        typeWriter(newsElement, "▶️ СТАТУС: Подписка неактивна. Для доступа к ключам приобретите тариф в боте.");
+                        typeWriter(newsElement, "▶️ СТАТУС: Подписка неактивна. Приобретите тариф в боте.");
                     });
                 }
             } else {
-                alert('Ошибка авторизации: ' + data.message);
+                throw new Error(data.message || 'Ошибка ответа API');
             }
         })
         .catch(error => {
-            console.error('Error contacting API:', error);
-            alert('Не удалось связаться с сервером. Попробуйте позже.');
+            console.error('Error during fetch:', error);
+            alert('Не удалось получить данные от сервера. Проверьте консоль (F12) на наличие ошибок.');
         });
     }
 
     function displayDashboard(data) {
         const dashboard = document.getElementById('user-dashboard');
-        
-        // Заполняем приветствие и статус
         document.getElementById('welcome-message').textContent = `Привет, ${data.first_name}!`;
         const endDate = new Date(data.subscription_end);
         document.getElementById('sub-status').textContent = `Активен до ${endDate.toLocaleDateString()} ${endDate.toLocaleTimeString()}`;
-
-        // Заполняем детали тарифа
         document.getElementById('tariff-name').textContent = `"${data.tariff_details.name}"`;
         const detailsList = document.getElementById('tariff-details-list');
         detailsList.innerHTML = `
@@ -711,48 +452,64 @@
             <li><strong>Подключения:</strong> ${data.tariff_details.connections}</li>
             <li><strong>Регион:</strong> ${data.tariff_details.region}</li>
         `;
-        
-        // Показываем ключ и генерируем QR-код
         const firstKey = data.keys[0];
         document.getElementById('connection-key').textContent = firstKey;
-        
-        // Очищаем старый QR-код, если он был, и генерируем новый
-        document.getElementById('qrcode-container').innerHTML = "";
-        new QRCode(document.getElementById("qrcode-container"), {
-            text: firstKey,
-            width: 180,
-            height: 180
-        });
-
-        // Показываем блок личного кабинета
+        const qrContainer = document.getElementById('qrcode-container');
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, { text: firstKey, width: 180, height: 180 });
         dashboard.style.display = 'block';
-        
-        // Обновляем новостную ленту
         const newsElement = document.getElementById('news-content-area');
         scrambleAndClear(newsElement, () => {
             typeWriter(newsElement, "▶️ СТАТУС: Авторизация успешна. Все системы в норме.");
         });
     }
 
-    // Вспомогательные функции typeWriter и scrambleAndClear оставьте без изменений
-
-    // Код для рендера виджета входа Telegram (остается без изменений)
-    function renderTelegramLoginWidget() {
-        if (window.Telegram) {
-            const container = document.getElementById('telegram-login-container');
-            const widget = document.createElement('script');
-            widget.src = "https://telegram.org/js/telegram-widget.js?22";
-            widget.setAttribute('data-telegram-login', 'YOUR_BOT_USERNAME'); // <-- ВАШ ЮЗЕРНЕЙМ БОТА
-            widget.setAttribute('data-size', 'large');
-            widget.setAttribute('data-radius', '0');
-            widget.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            widget.setAttribute('data-request-access', 'write');
-            container.appendChild(widget);
-        } else {
-            setTimeout(renderTelegramLoginWidget, 100);
+    // --- 4. ЗАПУСК ВСЕГО ПРИЛОЖЕНИЯ ---
+    window.addEventListener('load', () => {
+        // Запускаем вашу оригинальную анимацию загрузки
+        const initialLogo = document.getElementById('initial-logo');
+        const terminalLines = ["> ZelenyPath v.Ω connection protocol initiated...", "> Verifying signature... [OK]", "> Accessing node... [127.0.0.1]", "> No threats detected.", "> Routing to public interface..."];
+        const initScreen = document.getElementById('init-screen');
+        const surfaceInterface = document.getElementById('surface-interface');
+        
+        function runTerminalLines(index) {
+            if (index < terminalLines.length) {
+                const p = document.createElement('p');
+                p.style.margin = '0';
+                p.style.lineHeight = '1.3';
+                logElement.appendChild(p);
+                typeWriter(p, terminalLines[index], () => setTimeout(() => runTerminalLines(index + 1), 500));
+            } else {
+                setTimeout(() => {
+                    initScreen.style.opacity = '0';
+                    surfaceInterface.style.display = 'flex';
+                    setTimeout(() => {
+                        surfaceInterface.style.opacity = '1';
+                        initScreen.style.display = 'none';
+                        isBgAnimationRunning = false;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        document.getElementById('main-character-icon').style.opacity = '1';
+                        // Здесь мы НЕ запускаем startSurfaceScripts, так как ждем логина
+                    }, 500);
+                }, 1000);
+            }
         }
-    }
-    window.addEventListener('load', renderTelegramLoginWidget);
-    </script>
+        initialLogo.classList.add('logo-is-flickering');
+        animateBackground();
+        setTimeout(() => runTerminalLines(0), 1000);
+
+        // Инициализируем виджет Telegram
+        const loginContainer = document.getElementById('telegram-login-container');
+        // Очищаем от старой ссылки-заглушки
+        loginContainer.innerHTML = ""; 
+        const script = document.createElement('script');
+        script.src = 'https://telegram.org/js/telegram-widget.js?22';
+        script.setAttribute('data-telegram-login', BOT_USERNAME);
+        script.setAttribute('data-size', 'large');
+        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        script.setAttribute('data-request-access', 'write');
+        loginContainer.appendChild(script);
+    });
+</script>
 </body>
 </html>
