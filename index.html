@@ -1,140 +1,230 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZelenyPath</title>
-  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Press+Start+2P&family=Orbitron&display=swap" rel="stylesheet">
-  <style>
-    :root{--neon-lime:#00C852;--crt-green:#33FF99;--deep-black:#0D0D0D;--hot-pink:#FF4081;--accent-blue:#00E5FF;--neutral-gray:#B0BEC5;}
-    html,body{height:100%;margin:0;background:var(--deep-black);color:var(--neon-lime);font-family:'Share Tech Mono',monospace;overflow:hidden}
-    #background-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
-    .screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;opacity:0;transition:opacity .5s;z-index:2}
-    #init-screen{opacity:1;z-index:3;flex-direction:column;justify-content:center;align-items:center}
-    #surface-interface{display:none;background:transparent;padding:.5rem;box-sizing:border-box}
-    .surface-container{width:100%;height:100%;border:2px solid var(--neon-lime);padding:1rem;display:grid;grid-template-rows:auto auto 1fr auto}
-    .surface-header{display:flex;justify-content:space-between;border-bottom:2px solid var(--neon-lime);padding-bottom:.5rem}
-    .logo{font-family:'Press Start 2P',monospace;font-size:1.2rem;color:var(--hot-pink);margin:0}
-    .serial-number{font-size:1.2rem;color:var(--hot-pink)}
-    .telegram-button{background:var(--neon-lime);color:var(--deep-black);padding:10px 15px;border:2px solid var(--neon-lime);text-decoration:none;font-family:'Press Start 2P',monospace;font-size:.8rem}
-    .telegram-button:hover{background:var(--deep-black);color:var(--neon-lime)}
-    #user-dashboard{display:none;text-align:center;color:#fff;width:90%}
-    #qrcode-container{background:#fff;padding:10px;display:inline-block}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZelenyPath</title>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Press+Start+2P&family=VT323&family=Orbitron&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --neon-lime: #00C852; --crt-green: #33FF99; --deep-black: #0D0D0D;
+        --hot-pink: #FF4081; --accent-blue: #00E5FF; --neutral-gray: #B0BEC5;
+    }
+    html, body {
+        height: 100%; margin: 0; background-color: var(--deep-black);
+        color: var(--neon-lime); font-family: 'Share Tech Mono', monospace; overflow: hidden;
+    }
+    body {
+        background-color: var(--tg-theme-bg-color, var(--deep-black));
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    #background-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    .screen {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; opacity: 0; transition: opacity 0.5s ease-in-out;
+        z-index: 2; box-sizing: border-box;
+    }
+    #init-screen {
+        opacity: 1; z-index: 3; flex-direction: column;
+        justify-content: center; align-items: center;
+    }
+    .logo-container img { height: 80px; width: auto; filter: drop-shadow(0 0 15px var(--neon-lime)); }
+    #log { font-size: 1rem; color: var(--crt-green); width: 90%; max-width: 700px; max-height: 20vh; overflow: hidden; margin-bottom: 2rem; }
+    #surface-interface { display: none; background-color: transparent; padding: 0.5rem; box-sizing: border-box; }
+    .surface-container {
+        width: 100%; height: 100%; border: 2px solid var(--neon-lime);
+        box-shadow: 0 0 15px var(--neon-lime) inset, 0 0 10px rgba(0, 200, 82, 0.5);
+        display: grid; grid-template-rows: auto 1fr auto; padding: 1rem; box-sizing: border-box;
+    }
+    .surface-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-lime); padding-bottom: 0.5rem; gap: 1rem; }
+    .logo-area .logo { font-family: 'Press Start 2P', monospace; font-size: 1.2rem; color: var(--hot-pink); text-shadow: 0 0 5px var(--hot-pink); margin: 0; }
+    .logo-area .version-number { font-size: 0.7rem; color: var(--neutral-gray); margin-top: 4px; }
+    #ip-display { text-align: center; font-size: 1rem; color: var(--accent-blue); }
+    .surface-main { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+    .background-title { position: absolute; font-family: 'Orbitron', sans-serif; font-size: clamp(3rem, 15vw, 8rem); color: rgba(255, 255, 255, 0.05); margin: 0; z-index: 1; }
+    .main-image-placeholder { width: 150px; height: 150px; display: flex; justify-content: center; align-items: center; text-align: center; z-index: 2; }
+    .main-image-placeholder img { width: 100%; height: auto; max-width: 140px; }
+    .surface-footer { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 1rem; border-top: 2px solid var(--neon-lime); flex-wrap: wrap; gap: 1rem; }
+    .news-ticker-container h2 { font-family: 'Press Start 2P', monospace; font-size: 1rem; color: var(--accent-blue); margin: 0 0 0.5rem 0; }
+    .footer-right-column { display: flex; align-items: center; gap: 1rem; }
+    .serial-number { font-size: 1.2rem; color: var(--hot-pink); }
+</style>
 </head>
 <body>
-  <canvas id="background-canvas"></canvas>
-
-  <!-- Экран загрузки -->
-  <div id="init-screen" class="screen">
-    <div id="log"></div>
-    <div>
-      <img src="img/main.svg" alt="logo" style="height:80px;filter:drop-shadow(0 0 15px var(--neon-lime))">
-    </div>
-  </div>
-
-  <!-- Основной интерфейс -->
-  <div id="surface-interface" class="screen">
-    <div class="surface-container">
-      <header class="surface-header">
-        <div><p class="logo">PLASTFREI</p><p style="font-size:.7rem;color:var(--neutral-gray)">v1.3</p></div>
-        <div id="ip-display"><span id="country-flag">🏴</span> <span id="ip-address">127.0.0.1</span></div>
-        <div><a href="#" style="color:var(--accent-blue)">INDEX</a></div>
-      </header>
-
-      <div id="telegram-login-container" style="text-align:center;margin:1rem 0"></div>
-
-      <main style="display:flex;justify-content:center;align-items:center">
-        <div id="user-dashboard">
-          <h2 id="welcome-message" style="color:var(--hot-pink);font-family:'Press Start 2P'"></h2>
-          <p>Статус подписки: <strong id="sub-status" style="color:var(--crt-green)"></strong></p>
-
-          <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem">
-            <div>
-              <h4>Ключ подключения</h4>
-              <div id="qrcode-container"></div>
-              <code id="connection-key" style="background:#333;padding:5px;display:block;word-break:break-all"></code>
-            </div>
-            <div style="text-align:left">
-              <h4>Ваш тариф: <span id="tariff-name"></span></h4>
-              <ul id="tariff-details-list" style="list-style:none;padding:0"></ul>
-            </div>
-          </div>
+    <canvas id="background-canvas"></canvas>
+    <div id="init-screen" class="screen">
+        <div id="log"></div>
+        <div class="logo-container">
+            <img src="img/main.svg" alt="logo" id="initial-logo">
         </div>
-      </main>
-
-      <footer style="display:flex;justify-content:space-between;border-top:2px solid var(--neon-lime);padding-top:1rem">
-        <span class="serial-number">S/N: 7G-PLAST-95</span>
-        <a href="https://t.me/plastfreivpn_bot" target="_blank" class="telegram-button">TELEGRAM</a>
-      </footer>
     </div>
-  </div>
+    <div id="surface-interface" class="screen">
+        <div class="surface-container">
+            <header class="surface-header">
+                <div class="logo-area"><p class="logo">PLASTFREI</p><p class="version-number">v1.3</p></div>
+                <div id="ip-display"><span id="country-flag">🏴</span> <span id="ip-address">127.0.0.1</span></div>
+                <div class="header-right"><nav>INDEX MANIFEST CONNECTION</nav></div>
+            </header>
+            <main class="surface-main">
+                <h3 class="background-title">PLASTFREI</h3>
+                <div class="main-image-placeholder"><img src="img/main.svg" id="main-character-icon" alt="logo"></div>
+                <div id="user-dashboard" style="display: none; text-align: center; z-index: 3; color: white; width: 90%;">
+                    <h2 id="welcome-message" style="color: var(--hot-pink); font-family: 'Press Start 2P'; font-size: 1.2rem;"></h2>
+                    <p>Статус подписки: <strong id="sub-status" style="color: var(--crt-green);"></strong></p>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-top: 1.5rem;">
+                        <div style="flex-basis: 250px;">
+                            <h4>Ключ подключения</h4>
+                            <div id="qrcode-container" style="background: white; padding: 10px; display: inline-block;"></div>
+                            <p>Отсканируйте для быстрой вставки</p>
+                            <code id="connection-key" style="word-wrap: break-word; background: #333; padding: 5px; display: block; margin-top: 10px;"></code>
+                        </div>
+                        <div style="flex-basis: 250px; text-align: left;">
+                            <h4>Ваш тариф: <span id="tariff-name"></span></h4>
+                            <ul id="tariff-details-list" style="list-style: none; padding: 0;"></ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="surface-footer">
+                <div class="news-ticker-container"><h2>ГХВ-95 | Новости и предписания</h2><p id="news-content-area"></p></div>
+                <div class="footer-right-column">
+                    <div class="serial-number">S/N: 7G-PLAST-95</div>
+                    <div id="telegram-login-container"></div>
+                </div>
+            </footer>
+        </div>
+    </div>
 
-  <script>
-    /* ---------- 1. КОНФИГ ---------- */
-    const API_URL   = 'https://plastfrei-ulum.vercel.app/api/get_user_info';
-    const BOT_NAME  = 'plastfreivpn_bot';
+<script>
+    // --- 1. КОНФИГУРАЦИЯ ---
+    const API_URL = 'https://b89aeb0de059.ngrok-free.app/api/get_user_info';
+    const BOT_USERNAME = 'plastfreivpn_bot';
 
-    /* ---------- 2. Анимация фона ---------- */
-    const canvas = document.getElementById('background-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = innerWidth; canvas.height = innerHeight;
-    const cols = canvas.width / 16, drops = Array(cols).fill(1);
-    const chars = 'アァカサタナハマヤャラワガザダバパABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    function drawMatrix() {
-      ctx.fillStyle='rgba(13,13,13,.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle='var(--neon-lime)';ctx.font='16px monospace';
-      drops.forEach((y,i)=>{
-        const text = chars[Math.floor(Math.random()*chars.length)];
-        ctx.fillText(text,i*16,y*16);
-        if(y*16>canvas.height && Math.random()>.975) drops[i]=0;
-        drops[i]++;
-      });
-      requestAnimationFrame(drawMatrix);
-    }
-    drawMatrix();
-
-    /* ---------- 3. Логика Telegram ---------- */
-    function onTelegramAuth(user){
-      fetch(API_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(user)})
-        .then(r=>r.json()).then(d=>{
-          if(d.status!=='ok') throw new Error(d.message||'no data');
-          document.getElementById('welcome-message').textContent=`Привет, ${d.first_name}!`;
-          document.getElementById('sub-status').textContent=`Активен до ${new Date(d.subscription_end).toLocaleString()}`;
-          document.getElementById('tariff-name').textContent=d.tariff_details.name;
-          document.getElementById('tariff-details-list').innerHTML=
-            `<li>Скорость: ${d.tariff_details.speed}</li>
-             <li>Пинг: ${d.tariff_details.ping}</li>
-             <li>Подключения: ${d.tariff_details.connections}</li>
-             <li>Регион: ${d.tariff_details.region}</li>`;
-          document.getElementById('connection-key').textContent=d.keys[0];
-          new QRCode(document.getElementById('qrcode-container'),{text:d.keys[0],width:180,height:180});
-          document.getElementById('user-dashboard').style.display='block';
+    // --- 2. ГЛАВНЫЕ ФУНКЦИИ (ЛОГИКА) ---
+    function onTelegramAuth(user) {
+        // ... (код этой функции остается таким же)
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                document.querySelector('.main-image-placeholder').style.display = 'none';
+                document.querySelector('.background-title').style.display = 'none';
+                document.getElementById('telegram-login-container').style.display = 'none';
+                if (data.is_subscribed) {
+                    displayDashboard(data);
+                } else {
+                    alert("Подписка неактивна.");
+                }
+            } else { throw new Error(data.message || 'API Error'); }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Не удалось получить данные от сервера.');
         });
     }
 
-    /* ---------- 4. Инициализация виджета ---------- */
-    window.addEventListener('load',()=>{
-      const login=document.getElementById('telegram-login-container');
-      login.innerHTML='';
-      const s=document.createElement('script');
-      s.src='https://telegram.org/js/telegram-widget.js?22';
-      s.setAttribute('data-telegram-login',BOT_NAME);
-      s.setAttribute('data-size','large');
-      s.setAttribute('data-auth-url',API_URL);
-      s.setAttribute('data-onauth','onTelegramAuth');
-      s.setAttribute('data-request-access','write');
-      login.appendChild(s);
+    function displayDashboard(data) {
+        // ... (код этой функции остается таким же)
+        const dashboard = document.getElementById('user-dashboard');
+        document.getElementById('welcome-message').textContent = `Привет, ${data.first_name}!`;
+        const endDate = new Date(data.subscription_end);
+        document.getElementById('sub-status').textContent = `Активен до ${endDate.toLocaleDateString()}`;
+        document.getElementById('tariff-name').textContent = `"${data.tariff_details.name}"`;
+        document.getElementById('tariff-details-list').innerHTML = `<li><strong>Скорость:</strong> ${data.tariff_details.speed}</li><li><strong>Подключения:</strong> ${data.tariff_details.connections}</li>`;
+        const firstKey = data.keys[0];
+        document.getElementById('connection-key').textContent = firstKey;
+        const qrContainer = document.getElementById('qrcode-container');
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, { text: firstKey, width: 180, height: 180 });
+        dashboard.style.display = 'block';
+    }
 
-      /* скрыть заставку */
-      setTimeout(()=>{
-        document.getElementById('init-screen').style.opacity=0;
-        setTimeout(()=>{document.getElementById('init-screen').style.display='none';},500);
-        document.getElementById('surface-interface').style.display='flex';
-        document.getElementById('surface-interface').style.opacity=1;
-      },2500);
-    });
-  </script>
+    // --- 3. ИНИЦИАЛИЗАЦИЯ И УПРАВЛЕНИЕ ЗАПУСКОМ ---
+    function initializeTelegramWidget() {
+        const loginContainer = document.getElementById('telegram-login-container');
+        if (loginContainer) {
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-widget.js?22';
+            script.setAttribute('data-telegram-login', BOT_USERNAME);
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            script.setAttribute('data-request-access', 'write');
+            loginContainer.appendChild(script);
+        }
+    }
+
+    function initializeAnimations() {
+        // Здесь весь ваш код для анимаций
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let isBgAnimationRunning = true;
+        const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = Array.from({ length: columns }).fill(1);
+        function animateBackground() {
+            if (!isBgAnimationRunning) return;
+            ctx.fillStyle = 'rgba(13, 13, 13, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'var(--neon-lime)';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) { rainDrops[i] = 0; }
+                rainDrops[i]++;
+            }
+            requestAnimationFrame(animateBackground);
+        };
+        const logElement = document.getElementById('log');
+        function typeWriter(element, text, callback, i = 0) {
+            if (i < text.length) {
+                element.innerHTML = text.substring(0, i + 1) + '<span style="background:var(--neon-lime);animation:blink 1s infinite;display:inline-block;width:0.5em;height:1.2em;vertical-align:bottom;"></span>';
+                setTimeout(() => typeWriter(element, text, callback, i + 1), 20);
+            } else {
+                element.innerHTML = text;
+                if (callback) setTimeout(callback, 500);
+            }
+        }
+        const terminalLines = ["> Connection protocol initiated...", "> Verifying signature... [OK]", "> Routing to public interface..."];
+        const initScreen = document.getElementById('init-screen');
+        const surfaceInterface = document.getElementById('surface-interface');
+        function runTerminalLines(index) {
+            if (index < terminalLines.length) {
+                const p = document.createElement('p');
+                p.style.margin = '0';
+                logElement.appendChild(p);
+                typeWriter(p, terminalLines[index], () => setTimeout(() => runTerminalLines(index + 1), 500));
+            } else {
+                setTimeout(() => {
+                    initScreen.style.opacity = '0';
+                    surfaceInterface.style.display = 'flex';
+                    setTimeout(() => {
+                        surfaceInterface.style.opacity = '1';
+                        initScreen.style.display = 'none';
+                        isBgAnimationRunning = false;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // ФИНАЛЬНЫЙ ЭТАП: Инициализируем виджет, когда все готово
+                        initializeTelegramWidget();
+                    }, 500);
+                }, 1000);
+            }
+        }
+        animateBackground();
+        setTimeout(() => runTerminalLines(0), 500);
+    }
+
+    // ГЛАВНАЯ ТОЧКА ВХОДА: Запускаем все после полной загрузки страницы
+    window.addEventListener('load', initializeAnimations);
+</script>
 </body>
 </html>
