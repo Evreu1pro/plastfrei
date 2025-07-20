@@ -1,20 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <title>Авторизация – Plastfrei</title>
-  <style>
-    body{font-family:monospace;background:#0d0d0d;color:#00c852;display:flex;justify-content:center;align-items:center;height:100vh}
-  </style>
+    <meta charset="UTF-8">
+    <title>Вход через Telegram</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0D0D0D; }
+    </style>
 </head>
 <body>
-  <div>
-    <h2>Авторизация через Telegram</h2>
-    <script async src="https://telegram.org/js/telegram-widget.js?22"
-            data-telegram-login="plastfreivpn_bot"
-            data-size="large"
-            data-auth-url="https://plastfrei-ulum.vercel.app/api/get_user_info"
-            data-request-access="write"></script>
-  </div>
+    <div id="telegram-widget-container"></div>
+
+    <script>
+        const BOT_USERNAME = 'plastfreivpn_bot'; // <-- УКАЖИТЕ ЮЗЕРНЕЙМ ВАШЕГО БОТА
+
+        function onTelegramAuth(user) {
+            // Сохраняем данные пользователя во временное хранилище сессии
+            sessionStorage.setItem('telegramUser', JSON.stringify(user));
+            // Немедленно возвращаем пользователя на главную страницу
+            window.location.href = '/'; 
+        }
+
+        // Инициализация виджета
+        window.addEventListener('load', () => {
+            const container = document.getElementById('telegram-widget-container');
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-widget.js?22';
+            script.setAttribute('data-telegram-login', BOT_USERNAME);
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            script.setAttribute('data-request-access', 'write');
+            container.appendChild(script);
+        });
+    </script>
 </body>
 </html>
