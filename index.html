@@ -402,42 +402,57 @@
 
     // --- 3. ЛОГИКА СИНХРОНИЗАЦИИ С TELEGRAM ---
     function onTelegramAuth(user) {
-        console.log("Telegram auth data received:", user);
+    console.log('Шаг 1: Функция onTelegramAuth вызвана. Данные пользователя получены.');
+    
+    try {
         const newsElement = document.getElementById('news-content-area');
-        typeWriter(newsElement, "▶️ Авторизация... Проверка подписи... Соединение с ядром...");
-
+        if (newsElement) {
+            console.log('Шаг 2: Элемент новостей найден.');
+            typeWriter(newsElement, "▶️ Авторизация...", null);
+        } else {
+            console.warn('Шаг 2: Элемент новостей НЕ найден. Это может быть проблемой.');
+        }
+        
+        console.log(`Шаг 3: Готовлюсь отправить fetch-запрос на адрес: ${API_URL}`);
+        
         fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user)
         })
         .then(response => {
-            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+            console.log('Шаг 4: Получен ответ от API.');
+            if (!response.ok) {
+                throw new Error(`Сетевой ответ не в порядке: ${response.statusText}`);
+            }
             return response.json();
         })
         .then(data => {
-            console.log("Data from backend API:", data);
+            console.log('Шаг 5: Данные от API успешно обработаны:', data);
             if (data.status === 'ok') {
+                // ... остальная логика ...
                 document.querySelector('.main-image-placeholder').style.display = 'none';
                 document.querySelector('.background-title').style.display = 'none';
                 document.getElementById('telegram-login-container').style.display = 'none';
-                
                 if (data.is_subscribed) {
                     displayDashboard(data);
                 } else {
-                    scrambleAndClear(newsElement, () => {
-                        typeWriter(newsElement, "▶️ СТАТУС: Подписка неактивна. Приобретите тариф в боте.");
-                    });
+                    alert("Подписка неактивна.");
                 }
             } else {
-                throw new Error(data.message || 'Ошибка ответа API');
+                throw new Error(data.message || 'API вернул ошибку');
             }
         })
         .catch(error => {
-            console.error('Error during fetch:', error);
-            alert('Не удалось получить данные от сервера. Проверьте консоль (F12) на наличие ошибок.');
+            console.error('ОШИБКА на Шаге 4 или 5 (проблема с fetch-запросом):', error);
+            alert('Не удалось получить данные от сервера. Проверьте консоль (F12) на наличие ошибок CORS или других проблем с сетью.');
         });
+
+    } catch (e) {
+        console.error('КРИТИЧЕСКАЯ ОШИБКА внутри onTelegramAuth (до fetch):', e);
+        alert('Произошла критическая ошибка на стороне сайта. Проверьте консоль (F12).');
     }
+}
 
     function displayDashboard(data) {
         const dashboard = document.getElementById('user-dashboard');
